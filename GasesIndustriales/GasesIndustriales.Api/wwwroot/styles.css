@@ -64,6 +64,12 @@ button {
   cursor: pointer;
 }
 
+button.secondary-button,
+.secondary-button {
+  border: 1px solid var(--color-border);
+  background: transparent;
+}
+
 input,
 select,
 textarea {
@@ -166,6 +172,12 @@ textarea {
   font-size: 14px;
 }
 
+[id^="status-"] {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 14px;
+}
+
 .form-panel {
   margin-bottom: 28px;
 }
@@ -175,6 +187,65 @@ textarea {
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
   padding: 24px;
+}
+
+.compact-form {
+  padding: 0;
+}
+
+.form-actions,
+.panel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.panel-actions {
+  padding: 0 24px 24px;
+}
+
+.detail-builder {
+  display: grid;
+  gap: 16px;
+  padding: 0 24px 24px;
+}
+
+.detail-builder h3,
+.field-title {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.total-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  color: var(--color-muted);
+  font-weight: 800;
+}
+
+.total-row strong {
+  color: var(--color-green);
+}
+
+.check-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-top: 10px;
+  padding: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: #111411;
+}
+
+.empty-text {
+  margin: 0;
+  color: var(--color-muted);
 }
 
 .split-grid {
@@ -244,6 +315,7 @@ textarea {
   min-height: 34px;
   padding: 0 12px;
   font-size: 12px;
+  margin: 2px;
 }
 
 .table-wrapper {
@@ -289,6 +361,10 @@ td {
   }
 
   .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .check-list {
     grid-template-columns: 1fr;
   }
 
