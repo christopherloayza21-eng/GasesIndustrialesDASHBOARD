@@ -34,6 +34,8 @@ namespace GasesIndustriales.Api.Data
 
         public DbSet<DetalleEnvioRecarga> DetallesEnvioRecarga { get; set; }
 
+        public DbSet<Usuario> Usuarios { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Cliente>(entity =>
@@ -370,6 +372,35 @@ namespace GasesIndustriales.Api.Data
 
                 entity.Property(e => e.Observacion)
                     .HasColumnName("observacion");
+            });
+
+            modelBuilder.Entity<Usuario>(entity =>
+            {
+                entity.ToTable("usuario");
+
+                entity.HasKey(e => e.IdUsuario);
+
+                entity.Property(e => e.IdUsuario)
+                    .HasColumnName("id_usuario")
+                    .ValueGeneratedOnAdd();
+
+                entity.Property(e => e.Nombre)
+                    .HasColumnName("nombre");
+
+                entity.Property(e => e.Email)
+                    .HasColumnName("email");
+
+                entity.Property(e => e.PasswordHash)
+                    .HasColumnName("password_hash");
+
+                entity.Property(e => e.Rol)
+                    .HasColumnName("rol");
+
+                entity.Property(e => e.Activo)
+                    .HasColumnName("activo");
+
+                entity.Property(e => e.FechaCreacion)
+                    .HasColumnName("fecha_creacion");
             });
         }
     }

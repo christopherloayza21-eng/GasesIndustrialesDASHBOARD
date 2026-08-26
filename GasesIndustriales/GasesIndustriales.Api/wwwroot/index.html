@@ -7,6 +7,18 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <section class="login-screen" id="loginScreen">
+    <form class="login-card" id="loginForm">
+      <p class="eyebrow">Sistema interno</p>
+      <h1>Acceso GIA</h1>
+      <p class="login-help">Ingresa con tu usuario autorizado para gestionar inventario y operaciones.</p>
+      <label>Email<input name="email" type="email" autocomplete="username" required></label>
+      <label>Contraseña<input name="password" type="password" autocomplete="current-password" required></label>
+      <p class="status-message" id="loginStatus">Demo: admin@gia.local</p>
+      <button type="submit">Ingresar</button>
+    </form>
+  </section>
+
   <div class="app-shell">
     <aside class="sidebar" aria-label="Navegación principal">
       <div class="brand-mark">GIA</div>
@@ -29,7 +41,11 @@
           <p class="eyebrow">Sistema interno</p>
           <h1>Inventario y operaciones</h1>
         </div>
-        <button id="refreshButton" type="button">Actualizar</button>
+        <div class="topbar-actions">
+          <p id="userSession">Sesión no iniciada</p>
+          <button id="refreshButton" type="button">Actualizar</button>
+          <button class="secondary-button" id="logoutButton" type="button">Salir</button>
+        </div>
       </header>
 
     <section id="dashboardView" class="view active">
@@ -66,6 +82,7 @@
         <div data-module="conductores"></div>
         <div data-module="vehiculos"></div>
         <div data-module="proveedores"></div>
+        <div data-module="usuarios"></div>
       </section>
     </section>
     </main>

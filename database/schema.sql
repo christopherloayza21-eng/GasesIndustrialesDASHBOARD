@@ -242,3 +242,16 @@ CREATE TABLE detalle_envio_recarga (
     CONSTRAINT chk_estado_retorno
         CHECK (estado_retorno IN ('PENDIENTE', 'RECIBIDO', 'OBSERVADO'))
 );
+
+CREATE TABLE usuario (
+    id_usuario SERIAL PRIMARY KEY,
+    nombre VARCHAR(120) NOT NULL,
+    email VARCHAR(150) NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    rol VARCHAR(20) NOT NULL,
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
+    fecha_creacion TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT chk_usuario_rol
+        CHECK (rol IN ('ADMINISTRADOR', 'TRABAJADOR'))
+);

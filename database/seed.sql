@@ -100,3 +100,15 @@ VALUES
     'ENVIO_RECARGA',
     'Cilindro enviado al proveedor para recarga - GUIA-DEMO-001'
 );
+
+INSERT INTO usuario
+(nombre, email, password_hash, rol, activo)
+VALUES
+(
+    'Administrador GIA',
+    'admin@gia.local',
+    'PBKDF2-SHA256.100000.MnWwfBEtYf5GX48gn8cJyA==.OFObcfFy8dehupr9pVhbCQYqUXhO1vq5TKnfUE+iZ2A=',
+    'ADMINISTRADOR',
+    TRUE
+)
+ON CONFLICT (email) DO NOTHING;

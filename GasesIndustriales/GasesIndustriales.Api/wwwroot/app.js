@@ -1,5 +1,10 @@
 const statusText = document.querySelector("#statusText");
 const refreshButton = document.querySelector("#refreshButton");
+const logoutButton = document.querySelector("#logoutButton");
+const loginScreen = document.querySelector("#loginScreen");
+const loginForm = document.querySelector("#loginForm");
+const loginStatus = document.querySelector("#loginStatus");
+const userSession = document.querySelector("#userSession");
 const movimientosBody = document.querySelector("#movimientosBody");
 const tabButtons = document.querySelectorAll("[data-view]");
 const views = document.querySelectorAll(".view");
@@ -22,7 +27,13 @@ const state = {
   conductores: [],
   vehiculos: [],
   proveedores: [],
+  usuarios: [],
   detallePedido: []
+};
+
+const auth = {
+  token: localStorage.getItem("gia_token"),
+  user: JSON.parse(localStorage.getItem("gia_user") || "null")
 };
 
 const crudModules = {
@@ -111,17 +122,96 @@ const crudModules = {
       { name: "telefono", label: "Teléfono", type: "text" },
       { name: "direccion", label: "Dirección", type: "text" }
     ]
+  },
+  usuarios: {
+    title: "Usuarios",
+    endpoint: "/api/usuarios",
+    key: "idUsuario",
+    columns: ["idUsuario", "nombre", "email", "rol", "activo"],
+    fields: [
+      { name: "nombre", label: "Nombre", type: "text", required: true },
+      { name: "email", label: "Email", type: "email", required: true },
+      { name: "password", label: "Contraseña", type: "password" },
+      { name: "rol", label: "Rol", type: "select", options: ["ADMINISTRADOR", "TRABAJADOR"] }
+    ]
   }
 };
 
 refreshButton.addEventListener("click", cargarTodo);
+logoutButton.addEventListener("click", cerrarSesion);
+loginForm.addEventListener("submit", iniciarSesion);
 
 tabButtons.forEach((button) => {
   button.addEventListener("click", () => cambiarVista(button.dataset.view));
 });
 
 iniciarInterfaz();
-cargarTodo();
+iniciarSesionGuardada();
+
+function iniciarSesionGuardada() {
+  if (!auth.token) {
+    mostrarLogin();
+    return;
+  }
+
+  mostrarApp();
+  cargarTodo();
+}
+
+async function iniciarSesion(event) {
+  event.preventDefault();
+
+  const payload = {
+    email: normalizar(loginForm.elements.email.value),
+    password: loginForm.elements.password.value
+  };
+
+  if (!payload.email || !payload.password) {
+    loginStatus.textContent = "Ingresa email y contraseña.";
+    loginStatus.className = "status-message error";
+    return;
+  }
+
+  try {
+    loginStatus.textContent = "Validando acceso...";
+    loginStatus.className = "status-message";
+
+    const response = await apiJson("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      skipAuth: true
+    });
+
+    auth.token = response.token;
+    auth.user = response.usuario;
+    localStorage.setItem("gia_token", auth.token);
+    localStorage.setItem("gia_user", JSON.stringify(auth.user));
+    loginForm.reset();
+    mostrarApp();
+    await cargarTodo();
+  } catch (error) {
+    loginStatus.textContent = error.message;
+    loginStatus.className = "status-message error";
+  }
+}
+
+function cerrarSesion() {
+  localStorage.removeItem("gia_token");
+  localStorage.removeItem("gia_user");
+  auth.token = null;
+  auth.user = null;
+  mostrarLogin();
+}
+
+function mostrarLogin() {
+  loginScreen.classList.remove("hidden");
+}
+
+function mostrarApp() {
+  loginScreen.classList.add("hidden");
+  userSession.textContent = auth.user ? `${auth.user.nombre} | ${auth.user.rol}` : "Sesión iniciada";
+}
 
 function iniciarInterfaz() {
   Object.entries(crudModules).forEach(([moduleKey, config]) => {
@@ -146,7 +236,7 @@ async function cargarTodo() {
   await cargarCatalogos();
   await Promise.all([
     cargarDashboard(),
-    ...Object.keys(crudModules).map(cargarCrud),
+    ...obtenerModulosPermitidos().map(cargarCrud),
     cargarPedidos(),
     cargarMovimientos(),
     cargarRecargas()
@@ -156,6 +246,7 @@ async function cargarTodo() {
 }
 
 async function cargarCatalogos() {
+  const puedeAdministrarUsuarios = auth.user?.rol === "ADMINISTRADOR";
   const [
     clientes,
     productos,
@@ -163,7 +254,8 @@ async function cargarCatalogos() {
     zonas,
     conductores,
     vehiculos,
-    proveedores
+    proveedores,
+    usuarios
   ] = await Promise.all([
     apiJson("/api/clientes?incluirInactivos=true"),
     apiJson("/api/productos?incluirInactivos=true"),
@@ -171,7 +263,8 @@ async function cargarCatalogos() {
     apiJson("/api/zonas?incluirInactivos=true"),
     apiJson("/api/conductores?incluirInactivos=true"),
     apiJson("/api/vehiculos?incluirInactivos=true"),
-    apiJson("/api/proveedores?incluirInactivos=true")
+    apiJson("/api/proveedores?incluirInactivos=true"),
+    puedeAdministrarUsuarios ? apiJson("/api/usuarios?incluirInactivos=true") : Promise.resolve([])
   ]);
 
   state.clientes = clientes;
@@ -181,6 +274,13 @@ async function cargarCatalogos() {
   state.conductores = conductores;
   state.vehiculos = vehiculos;
   state.proveedores = proveedores;
+  state.usuarios = usuarios;
+}
+
+function obtenerModulosPermitidos() {
+  return Object.keys(crudModules).filter((moduleKey) => {
+    return moduleKey !== "usuarios" || auth.user?.rol === "ADMINISTRADOR";
+  });
 }
 
 async function cargarDashboard() {
@@ -985,7 +1085,25 @@ function renderizarMovimientosDashboard(movimientos) {
 }
 
 async function apiJson(url, options = {}) {
-  const response = await fetch(url, options);
+  const { skipAuth, ...fetchOptions } = options;
+  const headers = new Headers(fetchOptions.headers ?? {});
+
+  if (auth.token && !skipAuth) {
+    headers.set("Authorization", `Bearer ${auth.token}`);
+  }
+
+  fetchOptions.headers = headers;
+
+  const response = await fetch(url, fetchOptions);
+
+  if (response.status === 401) {
+    cerrarSesion();
+    throw new Error("Tu sesión expiró o no tienes acceso. Inicia sesión nuevamente.");
+  }
+
+  if (response.status === 403) {
+    throw new Error("No tienes permiso para realizar esta acción.");
+  }
 
   if (!response.ok) {
     const message = await leerMensajeError(response);

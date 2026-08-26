@@ -28,6 +28,52 @@ body {
   font-family: Inter, "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
+.login-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at top right, rgba(246, 191, 79, 0.28), transparent 24rem),
+    linear-gradient(135deg, #edf9fb 0%, #f7fbfc 45%, #eef4f7 100%);
+}
+
+.login-screen.hidden {
+  display: none;
+}
+
+.login-card {
+  display: grid;
+  gap: 16px;
+  width: min(100%, 430px);
+  padding: 34px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-soft);
+}
+
+.login-card h1 {
+  font-size: 36px;
+}
+
+.login-card label {
+  display: grid;
+  gap: 7px;
+  color: var(--color-muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.login-help,
+#userSession {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 14px;
+}
+
 .app-shell {
   display: grid;
   grid-template-columns: 92px 1fr;
@@ -146,6 +192,14 @@ body {
   justify-content: space-between;
   gap: 24px;
   min-height: 112px;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 12px;
 }
 
 .eyebrow {
