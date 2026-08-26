@@ -43,7 +43,8 @@ namespace GasesIndustriales.Api.Data
                 entity.HasKey(e => e.IdCliente);
 
                 entity.Property(e => e.IdCliente)
-                    .HasColumnName("id_cliente");
+                    .HasColumnName("id_cliente")
+                    .ValueGeneratedOnAdd();
 
                 entity.Property(e => e.RazonSocial)
                     .HasColumnName("razon_social");
@@ -77,7 +78,8 @@ namespace GasesIndustriales.Api.Data
                 entity.HasKey(e => e.IdProducto);
 
                 entity.Property(e => e.IdProducto)
-                    .HasColumnName("id_producto");
+                    .HasColumnName("id_producto")
+                    .ValueGeneratedOnAdd();
 
                 entity.Property(e => e.Codigo)
                     .HasColumnName("codigo");
@@ -105,7 +107,8 @@ namespace GasesIndustriales.Api.Data
                 entity.HasKey(e => e.IdZona);
 
                 entity.Property(e => e.IdZona)
-                    .HasColumnName("id_zona");
+                    .HasColumnName("id_zona")
+                    .ValueGeneratedOnAdd();
 
                 entity.Property(e => e.Nombre)
                     .HasColumnName("nombre");
@@ -124,7 +127,8 @@ namespace GasesIndustriales.Api.Data
                 entity.HasKey(e => e.IdCilindro);
 
                 entity.Property(e => e.IdCilindro)
-                    .HasColumnName("id_cilindro");
+                    .HasColumnName("id_cilindro")
+                    .ValueGeneratedOnAdd();
 
                 entity.Property(e => e.CodigoCilindro)
                     .HasColumnName("codigo_cilindro");
@@ -161,7 +165,8 @@ namespace GasesIndustriales.Api.Data
                 entity.HasKey(e => e.IdConductor);
 
                 entity.Property(e => e.IdConductor)
-                    .HasColumnName("id_conductor");
+                    .HasColumnName("id_conductor")
+                    .ValueGeneratedOnAdd();
 
                 entity.Property(e => e.Nombre)
                     .HasColumnName("nombre");
@@ -180,7 +185,8 @@ namespace GasesIndustriales.Api.Data
                 entity.HasKey(e => e.IdVehiculo);
 
                 entity.Property(e => e.IdVehiculo)
-                    .HasColumnName("id_vehiculo");
+                    .HasColumnName("id_vehiculo")
+                    .ValueGeneratedOnAdd();
 
                 entity.Property(e => e.Placa)
                     .HasColumnName("placa");
@@ -199,7 +205,8 @@ namespace GasesIndustriales.Api.Data
                 entity.HasKey(e => e.IdPedido);
 
                 entity.Property(e => e.IdPedido)
-                    .HasColumnName("id_pedido");
+                    .HasColumnName("id_pedido")
+                    .ValueGeneratedOnAdd();
 
                 entity.Property(e => e.IdCliente)
                     .HasColumnName("id_cliente");
@@ -233,7 +240,8 @@ namespace GasesIndustriales.Api.Data
                 entity.HasKey(e => e.IdMovimiento);
 
                 entity.Property(e => e.IdMovimiento)
-                    .HasColumnName("id_movimiento");
+                    .HasColumnName("id_movimiento")
+                    .ValueGeneratedOnAdd();
 
                 entity.Property(e => e.IdCilindro)
                     .HasColumnName("id_cilindro");
@@ -267,7 +275,8 @@ namespace GasesIndustriales.Api.Data
                 entity.HasKey(e => e.IdDetalle);
 
                 entity.Property(e => e.IdDetalle)
-                    .HasColumnName("id_detalle");
+                    .HasColumnName("id_detalle")
+                    .ValueGeneratedOnAdd();
 
                 entity.Property(e => e.IdPedido)
                     .HasColumnName("id_pedido");
@@ -292,7 +301,8 @@ namespace GasesIndustriales.Api.Data
                 entity.HasKey(e => e.IdProveedor);
 
                 entity.Property(e => e.IdProveedor)
-                    .HasColumnName("id_proveedor");
+                    .HasColumnName("id_proveedor")
+                    .ValueGeneratedOnAdd();
 
                 entity.Property(e => e.RazonSocial)
                     .HasColumnName("razon_social");
@@ -317,7 +327,8 @@ namespace GasesIndustriales.Api.Data
                 entity.HasKey(e => e.IdEnvio);
 
                 entity.Property(e => e.IdEnvio)
-                    .HasColumnName("id_envio");
+                    .HasColumnName("id_envio")
+                    .ValueGeneratedOnAdd();
 
                 entity.Property(e => e.IdProveedor)
                     .HasColumnName("id_proveedor");
@@ -342,7 +353,8 @@ namespace GasesIndustriales.Api.Data
                 entity.HasKey(e => e.IdDetalleEnvio);
 
                 entity.Property(e => e.IdDetalleEnvio)
-                    .HasColumnName("id_detalle_envio");
+                    .HasColumnName("id_detalle_envio")
+                    .ValueGeneratedOnAdd();
 
                 entity.Property(e => e.IdEnvio)
                     .HasColumnName("id_envio");

@@ -133,6 +133,11 @@ namespace GasesIndustriales.Api.Controllers
                 return BadRequest("El vehículo no existe o está inactivo.");
             }
 
+            if (request.IdPedido.HasValue && !await _context.Pedidos.AnyAsync(item => item.IdPedido == request.IdPedido))
+            {
+                return BadRequest("El pedido indicado no existe.");
+            }
+
             await using var transaction = await _context.Database.BeginTransactionAsync();
 
             cilindro.EstadoActual = nuevoEstado;
@@ -151,11 +156,19 @@ namespace GasesIndustriales.Api.Controllers
                 Observacion = Normalizar(request.Observacion)
             };
 
-            _context.MovimientosCilindro.Add(movimiento);
-            await _context.SaveChangesAsync();
-            await transaction.CommitAsync();
+            try
+            {
+                _context.MovimientosCilindro.Add(movimiento);
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
 
-            return CreatedAtAction(nameof(GetMovimientos), new { id = movimiento.IdMovimiento }, movimiento);
+                return CreatedAtAction(nameof(GetMovimientos), new { id = movimiento.IdMovimiento }, movimiento);
+            }
+            catch (DbUpdateException ex)
+            {
+                await transaction.RollbackAsync();
+                return BadRequest($"No se pudo registrar el movimiento. {ObtenerMensajeBaseDatos(ex)}");
+            }
         }
 
         private async Task<string> ObtenerNombreCliente(int idCliente)
@@ -172,6 +185,11 @@ namespace GasesIndustriales.Api.Controllers
         private static string? Normalizar(string? valor)
         {
             return string.IsNullOrWhiteSpace(valor) ? null : valor.Trim();
+        }
+
+        private static string ObtenerMensajeBaseDatos(DbUpdateException ex)
+        {
+            return ex.InnerException?.Message ?? ex.Message;
         }
     }
 

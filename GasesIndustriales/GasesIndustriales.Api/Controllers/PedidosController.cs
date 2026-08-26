@@ -116,13 +116,21 @@ namespace GasesIndustriales.Api.Controllers
                 Observaciones = Normalizar(request.Observaciones)
             };
 
-            _context.Pedidos.Add(pedido);
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.Pedidos.Add(pedido);
+                await _context.SaveChangesAsync();
 
-            await GuardarDetalles(pedido.IdPedido, request.Detalles);
-            await transaction.CommitAsync();
+                await GuardarDetalles(pedido.IdPedido, request.Detalles);
+                await transaction.CommitAsync();
 
-            return CreatedAtAction(nameof(GetPedidoPorId), new { id = pedido.IdPedido }, new { pedido.IdPedido });
+                return CreatedAtAction(nameof(GetPedidoPorId), new { id = pedido.IdPedido }, new { pedido.IdPedido });
+            }
+            catch (DbUpdateException ex)
+            {
+                await transaction.RollbackAsync();
+                return BadRequest($"No se pudo guardar el pedido. {ObtenerMensajeBaseDatos(ex)}");
+            }
         }
 
         [HttpPut("{id:int}")]
@@ -156,14 +164,22 @@ namespace GasesIndustriales.Api.Controllers
             pedido.IdVehiculo = request.IdVehiculo;
             pedido.Observaciones = Normalizar(request.Observaciones);
 
-            var detallesActuales = _context.DetallesPedido.Where(detalle => detalle.IdPedido == id);
-            _context.DetallesPedido.RemoveRange(detallesActuales);
-            await GuardarDetalles(id, request.Detalles);
+            try
+            {
+                var detallesActuales = _context.DetallesPedido.Where(detalle => detalle.IdPedido == id);
+                _context.DetallesPedido.RemoveRange(detallesActuales);
+                await GuardarDetalles(id, request.Detalles);
 
-            await _context.SaveChangesAsync();
-            await transaction.CommitAsync();
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
 
-            return Ok(new { pedido.IdPedido });
+                return Ok(new { pedido.IdPedido });
+            }
+            catch (DbUpdateException ex)
+            {
+                await transaction.RollbackAsync();
+                return BadRequest($"No se pudo actualizar el pedido. {ObtenerMensajeBaseDatos(ex)}");
+            }
         }
 
         [HttpPatch("{id:int}/asignacion")]
@@ -244,6 +260,21 @@ namespace GasesIndustriales.Api.Controllers
                 return BadRequest("El cliente no existe o está inactivo.");
             }
 
+            if (request.IdZona.HasValue && !await _context.Zonas.AnyAsync(zona => zona.IdZona == request.IdZona && zona.Activo))
+            {
+                return BadRequest("La zona no existe o está inactiva.");
+            }
+
+            if (request.IdConductor.HasValue && !await _context.Conductores.AnyAsync(conductor => conductor.IdConductor == request.IdConductor && conductor.Activo))
+            {
+                return BadRequest("El conductor no existe o está inactivo.");
+            }
+
+            if (request.IdVehiculo.HasValue && !await _context.Vehiculos.AnyAsync(vehiculo => vehiculo.IdVehiculo == request.IdVehiculo && vehiculo.Activo))
+            {
+                return BadRequest("El vehículo no existe o está inactivo.");
+            }
+
             if (request.Detalles.Count == 0)
             {
                 return BadRequest("El pedido debe tener al menos un producto.");
@@ -313,6 +344,11 @@ namespace GasesIndustriales.Api.Controllers
         private static string? Normalizar(string? valor)
         {
             return string.IsNullOrWhiteSpace(valor) ? null : valor.Trim();
+        }
+
+        private static string ObtenerMensajeBaseDatos(DbUpdateException ex)
+        {
+            return ex.InnerException?.Message ?? ex.Message;
         }
     }
 
