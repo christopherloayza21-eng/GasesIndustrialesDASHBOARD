@@ -1,6 +1,7 @@
 using GasesIndustriales.Api.Data;
 using GasesIndustriales.Api.Dtos.Cilindros;
 using GasesIndustriales.Api.Models;
+using GasesIndustriales.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,10 +12,12 @@ namespace GasesIndustriales.Api.Controllers
     public class CilindrosController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly ISystemClock _clock;
 
-        public CilindrosController(AppDbContext context)
+        public CilindrosController(AppDbContext context, ISystemClock clock)
         {
             _context = context;
+            _clock = clock;
         }
 
         [HttpGet]
@@ -109,7 +112,7 @@ namespace GasesIndustriales.Api.Controllers
                 IdClientePropietario = request.IdClientePropietario,
                 EstadoActual = NormalizarEstado(request.EstadoActual),
                 UbicacionActual = Normalizar(request.UbicacionActual) ?? "ALMACEN",
-                FechaUltimoMovimiento = DateTime.Now,
+                FechaUltimoMovimiento = _clock.UtcNow,
                 Activo = true
             };
 
@@ -281,22 +284,4 @@ namespace GasesIndustriales.Api.Controllers
         }
     }
 
-    public class CilindroRequest
-    {
-        public string CodigoCilindro { get; set; } = string.Empty;
-
-        public int IdProducto { get; set; }
-
-        public decimal? Capacidad { get; set; }
-
-        public string PropietarioTipo { get; set; } = "EMPRESA";
-
-        public int? IdClientePropietario { get; set; }
-
-        public string EstadoActual { get; set; } = "LLENO_ALMACEN";
-
-        public string? UbicacionActual { get; set; }
-
-        public bool Activo { get; set; } = true;
-    }
 }

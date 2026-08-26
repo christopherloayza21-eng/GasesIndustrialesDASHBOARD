@@ -293,6 +293,23 @@ textarea {
   font-weight: 700;
 }
 
+.status-message {
+  max-width: 760px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--color-surface-soft);
+}
+
+.status-message.success {
+  background: rgba(36, 180, 90, 0.12);
+  color: #168a43;
+}
+
+.status-message.error {
+  background: rgba(217, 75, 66, 0.12);
+  color: var(--color-danger);
+}
+
 .form-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

@@ -1,5 +1,7 @@
 using GasesIndustriales.Api.Data;
+using GasesIndustriales.Api.Dtos.Recargas;
 using GasesIndustriales.Api.Models;
+using GasesIndustriales.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,10 +12,12 @@ namespace GasesIndustriales.Api.Controllers
     public class RecargasController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly ISystemClock _clock;
 
-        public RecargasController(AppDbContext context)
+        public RecargasController(AppDbContext context, ISystemClock clock)
         {
             _context = context;
+            _clock = clock;
         }
 
         [HttpGet("envios")]
@@ -102,7 +106,7 @@ namespace GasesIndustriales.Api.Controllers
             var envio = new EnvioRecarga
             {
                 IdProveedor = request.IdProveedor,
-                FechaEnvio = DateTime.Now,
+                FechaEnvio = _clock.UtcNow,
                 NumeroGuia = Normalizar(request.NumeroGuia),
                 Estado = "ENVIADO",
                 Observaciones = Normalizar(request.Observaciones)
@@ -115,7 +119,7 @@ namespace GasesIndustriales.Api.Controllers
             {
                 cilindro.EstadoActual = "EN_PROVEEDOR";
                 cilindro.UbicacionActual = "PROVEEDOR";
-                cilindro.FechaUltimoMovimiento = DateTime.Now;
+                cilindro.FechaUltimoMovimiento = _clock.UtcNow;
 
                 _context.DetallesEnvioRecarga.Add(new DetalleEnvioRecarga
                 {
@@ -128,7 +132,7 @@ namespace GasesIndustriales.Api.Controllers
                 {
                     IdCilindro = cilindro.IdCilindro,
                     TipoMovimiento = "ENVIO_RECARGA",
-                    FechaMovimiento = DateTime.Now,
+                    FechaMovimiento = _clock.UtcNow,
                     Observacion = $"Envío de recarga {envio.NumeroGuia ?? envio.IdEnvio.ToString()}"
                 });
             }
@@ -165,18 +169,18 @@ namespace GasesIndustriales.Api.Controllers
             await using var transaction = await _context.Database.BeginTransactionAsync();
 
             detalle.EstadoRetorno = request.Observado ? "OBSERVADO" : "RECIBIDO";
-            detalle.FechaRetorno = DateTime.Now;
+            detalle.FechaRetorno = _clock.UtcNow;
             detalle.Observacion = Normalizar(request.Observacion);
 
             cilindro.EstadoActual = request.Observado ? "VACIO_ALMACEN" : "LLENO_ALMACEN";
             cilindro.UbicacionActual = "ALMACEN";
-            cilindro.FechaUltimoMovimiento = DateTime.Now;
+            cilindro.FechaUltimoMovimiento = _clock.UtcNow;
 
             _context.MovimientosCilindro.Add(new MovimientoCilindro
             {
                 IdCilindro = idCilindro,
                 TipoMovimiento = "RETORNO_RECARGA",
-                FechaMovimiento = DateTime.Now,
+                FechaMovimiento = _clock.UtcNow,
                 Observacion = Normalizar(request.Observacion) ?? $"Retorno de recarga {idEnvio}"
             });
 
@@ -226,21 +230,4 @@ namespace GasesIndustriales.Api.Controllers
         }
     }
 
-    public class EnvioRecargaRequest
-    {
-        public int IdProveedor { get; set; }
-
-        public string? NumeroGuia { get; set; }
-
-        public string? Observaciones { get; set; }
-
-        public List<int> CilindroIds { get; set; } = new();
-    }
-
-    public class RecibirCilindroRequest
-    {
-        public bool Observado { get; set; }
-
-        public string? Observacion { get; set; }
-    }
 }

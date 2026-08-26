@@ -1,4 +1,5 @@
 using GasesIndustriales.Api.Data;
+using GasesIndustriales.Api.Dtos.Maestros;
 using GasesIndustriales.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -112,12 +113,4 @@ namespace GasesIndustriales.Api.Controllers
         }
     }
 
-    public class ConductorRequest
-    {
-        public string Nombre { get; set; } = string.Empty;
-
-        public string? Telefono { get; set; }
-
-        public bool Activo { get; set; } = true;
-    }
 }

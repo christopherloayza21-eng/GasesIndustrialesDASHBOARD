@@ -386,6 +386,11 @@ function limpiarFormularioCrud(moduleKey) {
 async function cambiarEstadoCrud(moduleKey, id, activo) {
   const config = crudModules[moduleKey];
   const url = activo ? `${config.endpoint}/${id}` : `${config.endpoint}/${id}/reactivar`;
+  const accion = activo ? "desactivar" : "reactivar";
+
+  if (!confirm(`¿Seguro que deseas ${accion} este registro?`)) {
+    return;
+  }
 
   try {
     await apiJson(url, { method: activo ? "DELETE" : "PATCH" });
@@ -520,8 +525,13 @@ async function crearPedido() {
     detalles: state.detallePedido
   };
 
+  if (!payload.idCliente) {
+    setStatus("pedidos", "Selecciona un cliente antes de crear el pedido.", "error");
+    return;
+  }
+
   if (!payload.detalles.length) {
-    setStatus("pedidos", "Agrega al menos un producto.");
+    setStatus("pedidos", "Agrega al menos un producto.", "error");
     return;
   }
 
@@ -536,9 +546,9 @@ async function crearPedido() {
     state.detallePedido = [];
     renderizarDetallePedido();
     await cargarTodo();
-    setStatus("pedidos", "Pedido creado");
+    setStatus("pedidos", "Pedido creado", "success");
   } catch (error) {
-    setStatus("pedidos", error.message);
+    setStatus("pedidos", error.message, "error");
   }
 }
 
@@ -571,6 +581,10 @@ function renderizarPedidos() {
 }
 
 async function cambiarEstadoPedido(idPedido, estado) {
+  if (!confirm(`¿Confirmas cambiar el pedido a ${estado}?`)) {
+    return;
+  }
+
   try {
     const url = estado === "CANCELADO" ? `/api/pedidos/${idPedido}/cancelar` : `/api/pedidos/${idPedido}/estado`;
     const options = estado === "CANCELADO"
@@ -579,9 +593,9 @@ async function cambiarEstadoPedido(idPedido, estado) {
 
     await apiJson(url, options);
     await cargarTodo();
-    setStatus("pedidos", `Pedido ${estado.toLowerCase()}`);
+    setStatus("pedidos", `Pedido ${estado.toLowerCase()}`, "success");
   } catch (error) {
-    setStatus("pedidos", error.message);
+    setStatus("pedidos", error.message, "error");
   }
 }
 
@@ -650,6 +664,11 @@ async function crearMovimiento(event) {
     observacion: normalizar(form.elements.observacion.value)
   };
 
+  if (!payload.idCilindro) {
+    setStatus("movimientos", "Selecciona un cilindro antes de registrar el movimiento.", "error");
+    return;
+  }
+
   try {
     await apiJson(`/api/movimientos/${tipo}`, {
       method: "POST",
@@ -659,9 +678,9 @@ async function crearMovimiento(event) {
 
     form.reset();
     await cargarTodo();
-    setStatus("movimientos", "Movimiento registrado");
+    setStatus("movimientos", "Movimiento registrado", "success");
   } catch (error) {
-    setStatus("movimientos", error.message);
+    setStatus("movimientos", error.message, "error");
   }
 }
 
@@ -768,6 +787,16 @@ async function crearEnvioRecarga(event) {
     cilindroIds
   };
 
+  if (!payload.idProveedor) {
+    setStatus("recargas", "Selecciona un proveedor antes de crear el envío.", "error");
+    return;
+  }
+
+  if (!payload.cilindroIds.length) {
+    setStatus("recargas", "Selecciona al menos un cilindro vacío para enviar.", "error");
+    return;
+  }
+
   try {
     await apiJson("/api/recargas/envios", {
       method: "POST",
@@ -777,9 +806,9 @@ async function crearEnvioRecarga(event) {
 
     form.reset();
     await cargarTodo();
-    setStatus("recargas", "Envío creado");
+    setStatus("recargas", "Envío creado", "success");
   } catch (error) {
-    setStatus("recargas", error.message);
+    setStatus("recargas", error.message, "error");
   }
 }
 
@@ -871,12 +900,16 @@ async function recibirCilindroRecarga(event) {
 }
 
 async function cerrarEnvioRecarga(idEnvio) {
+  if (!confirm("¿Seguro que deseas cerrar este envío de recarga?")) {
+    return;
+  }
+
   try {
     await apiJson(`/api/recargas/envios/${idEnvio}/cerrar`, { method: "PATCH" });
     await cargarTodo();
-    setStatus("recargas", "Envío cerrado");
+    setStatus("recargas", "Envío cerrado", "success");
   } catch (error) {
-    setStatus("recargas", error.message);
+    setStatus("recargas", error.message, "error");
   }
 }
 
@@ -909,6 +942,11 @@ function leerFormulario(form, fields) {
 function refrescarSelects() {
   document.querySelectorAll("select[data-source]").forEach((select) => {
     const source = select.dataset.source;
+
+    if (!source) {
+      return;
+    }
+
     const rows = source === "gases"
       ? state.productos.filter((producto) => producto.activo && producto.tipoProducto === "GAS")
       : (state[source] ?? []).filter((item) => item.activo !== false);
@@ -950,7 +988,7 @@ async function apiJson(url, options = {}) {
   const response = await fetch(url, options);
 
   if (!response.ok) {
-    const message = await response.text();
+    const message = await leerMensajeError(response);
     throw new Error(message || `Error HTTP ${response.status}`);
   }
 
@@ -961,11 +999,28 @@ async function apiJson(url, options = {}) {
   return response.json();
 }
 
-function setStatus(moduleKey, message) {
+async function leerMensajeError(response) {
+  const contentType = response.headers.get("content-type") ?? "";
+
+  if (contentType.includes("application/json")) {
+    const error = await response.json();
+
+    if (error.errors) {
+      return Object.values(error.errors).flat().join(" ");
+    }
+
+    return error.detail ?? error.title ?? JSON.stringify(error);
+  }
+
+  return response.text();
+}
+
+function setStatus(moduleKey, message, type = "info") {
   const status = document.querySelector(`#status-${moduleKey}`);
 
   if (status) {
     status.textContent = message;
+    status.className = `status-message ${type}`;
   }
 }
 

@@ -1,5 +1,7 @@
 using GasesIndustriales.Api.Data;
+using GasesIndustriales.Api.Dtos.Pedidos;
 using GasesIndustriales.Api.Models;
+using GasesIndustriales.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,10 +12,12 @@ namespace GasesIndustriales.Api.Controllers
     public class PedidosController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly ISystemClock _clock;
 
-        public PedidosController(AppDbContext context)
+        public PedidosController(AppDbContext context, ISystemClock clock)
         {
             _context = context;
+            _clock = clock;
         }
 
         [HttpGet]
@@ -107,7 +111,7 @@ namespace GasesIndustriales.Api.Controllers
             var pedido = new Pedido
             {
                 IdCliente = request.IdCliente,
-                FechaPedido = DateTime.Now,
+                FechaPedido = _clock.UtcNow,
                 DireccionEntrega = Normalizar(request.DireccionEntrega),
                 IdZona = request.IdZona,
                 IdConductor = request.IdConductor,
@@ -352,56 +356,4 @@ namespace GasesIndustriales.Api.Controllers
         }
     }
 
-    public class PedidoRequest
-    {
-        public int IdCliente { get; set; }
-
-        public string? DireccionEntrega { get; set; }
-
-        public int? IdZona { get; set; }
-
-        public int? IdConductor { get; set; }
-
-        public int? IdVehiculo { get; set; }
-
-        public string? Observaciones { get; set; }
-
-        public List<DetallePedidoRequest> Detalles { get; set; } = new();
-    }
-
-    public class DetallePedidoRequest
-    {
-        public int IdProducto { get; set; }
-
-        public decimal Cantidad { get; set; }
-
-        public decimal? PrecioUnitario { get; set; }
-    }
-
-    public class DetallePedidoResponse
-    {
-        public int IdDetalle { get; set; }
-
-        public int IdProducto { get; set; }
-
-        public string Producto { get; set; } = string.Empty;
-
-        public decimal Cantidad { get; set; }
-
-        public decimal? PrecioUnitario { get; set; }
-
-        public decimal? Subtotal { get; set; }
-    }
-
-    public class AsignacionPedidoRequest
-    {
-        public int? IdConductor { get; set; }
-
-        public int? IdVehiculo { get; set; }
-    }
-
-    public class CambiarEstadoPedidoRequest
-    {
-        public string Estado { get; set; } = "PENDIENTE";
-    }
 }

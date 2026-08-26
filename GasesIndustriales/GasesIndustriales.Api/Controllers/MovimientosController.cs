@@ -1,5 +1,7 @@
 using GasesIndustriales.Api.Data;
+using GasesIndustriales.Api.Dtos.Movimientos;
 using GasesIndustriales.Api.Models;
+using GasesIndustriales.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,10 +12,12 @@ namespace GasesIndustriales.Api.Controllers
     public class MovimientosController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly ISystemClock _clock;
 
-        public MovimientosController(AppDbContext context)
+        public MovimientosController(AppDbContext context, ISystemClock clock)
         {
             _context = context;
+            _clock = clock;
         }
 
         [HttpGet]
@@ -142,14 +146,14 @@ namespace GasesIndustriales.Api.Controllers
 
             cilindro.EstadoActual = nuevoEstado;
             cilindro.UbicacionActual = nuevaUbicacion;
-            cilindro.FechaUltimoMovimiento = DateTime.Now;
+            cilindro.FechaUltimoMovimiento = _clock.UtcNow;
 
             var movimiento = new MovimientoCilindro
             {
                 IdCilindro = request.IdCilindro,
                 IdPedido = request.IdPedido,
                 TipoMovimiento = tipoMovimiento,
-                FechaMovimiento = DateTime.Now,
+                FechaMovimiento = _clock.UtcNow,
                 IdCliente = request.IdCliente,
                 IdConductor = request.IdConductor,
                 IdVehiculo = request.IdVehiculo,
@@ -193,18 +197,4 @@ namespace GasesIndustriales.Api.Controllers
         }
     }
 
-    public class MovimientoRequest
-    {
-        public int IdCilindro { get; set; }
-
-        public int? IdPedido { get; set; }
-
-        public int? IdCliente { get; set; }
-
-        public int? IdConductor { get; set; }
-
-        public int? IdVehiculo { get; set; }
-
-        public string? Observacion { get; set; }
-    }
 }

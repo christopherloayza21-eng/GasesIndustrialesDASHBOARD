@@ -1,5 +1,7 @@
 
 using GasesIndustriales.Api.Data;
+using GasesIndustriales.Api.Middleware;
+using GasesIndustriales.Api.Services;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -14,6 +16,7 @@ builder.Logging.AddDebug();
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+builder.Services.AddSingleton<ISystemClock, SystemClock>();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(
@@ -22,6 +25,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 );
 
 var app = builder.Build();
+
+app.UseMiddleware<ApiExceptionMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
