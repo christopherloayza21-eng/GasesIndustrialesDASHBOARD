@@ -7,25 +7,30 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header class="topbar">
-    <div>
-      <p class="eyebrow">Sistema interno</p>
-      <h1>Inventario y operaciones</h1>
-    </div>
-    <button id="refreshButton" type="button">Actualizar</button>
-  </header>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Navegación principal">
+      <div class="brand-mark">GIA</div>
+      <nav class="tabs">
+        <button class="tab-button active" type="button" data-view="dashboardView" title="Dashboard"><span>DB</span><strong>Dashboard</strong></button>
+        <button class="tab-button" type="button" data-view="clientesView" title="Clientes"><span>CL</span><strong>Clientes</strong></button>
+        <button class="tab-button" type="button" data-view="productosView" title="Productos"><span>PR</span><strong>Productos</strong></button>
+        <button class="tab-button" type="button" data-view="cilindrosView" title="Cilindros"><span>CI</span><strong>Cilindros</strong></button>
+        <button class="tab-button" type="button" data-view="pedidosView" title="Pedidos"><span>PE</span><strong>Pedidos</strong></button>
+        <button class="tab-button" type="button" data-view="movimientosView" title="Movimientos"><span>MO</span><strong>Movimientos</strong></button>
+        <button class="tab-button" type="button" data-view="recargasView" title="Recargas"><span>RE</span><strong>Recargas</strong></button>
+        <button class="tab-button" type="button" data-view="maestrosView" title="Maestros"><span>MA</span><strong>Maestros</strong></button>
+      </nav>
+      <div class="sidebar-footer">v1</div>
+    </aside>
 
-  <main class="page">
-    <nav class="tabs" aria-label="Módulos del sistema">
-      <button class="tab-button active" type="button" data-view="dashboardView">Dashboard</button>
-      <button class="tab-button" type="button" data-view="clientesView">Clientes</button>
-      <button class="tab-button" type="button" data-view="productosView">Productos</button>
-      <button class="tab-button" type="button" data-view="cilindrosView">Cilindros</button>
-      <button class="tab-button" type="button" data-view="pedidosView">Pedidos</button>
-      <button class="tab-button" type="button" data-view="movimientosView">Movimientos</button>
-      <button class="tab-button" type="button" data-view="recargasView">Recargas</button>
-      <button class="tab-button" type="button" data-view="maestrosView">Maestros</button>
-    </nav>
+    <main class="page">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Sistema interno</p>
+          <h1>Inventario y operaciones</h1>
+        </div>
+        <button id="refreshButton" type="button">Actualizar</button>
+      </header>
 
     <section id="dashboardView" class="view active">
       <section class="summary-grid" aria-label="Resumen operativo">
@@ -63,7 +68,8 @@
         <div data-module="proveedores"></div>
       </section>
     </section>
-  </main>
+    </main>
+  </div>
 
   <script src="app.js"></script>
 </body>
