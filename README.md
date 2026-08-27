@@ -21,19 +21,43 @@ Proyecto en desarrollo. Actualmente incluye:
 
 ## Capturas
 
-Las capturas finales se agregarán cuando el diseño esté cerrado.
+Estas capturas muestran el estado actual del sistema interno: acceso, dashboard operativo y modulos principales de gestion.
 
-Sugerencia de estructura:
+### Login
 
-```text
-docs/
-└── screenshots/
-    ├── dashboard.png
-    ├── login.png
-    ├── cilindros.png
-    ├── pedidos.png
-    └── recargas.png
-```
+![Login del sistema](docs/screenshots/login.png)
+
+### Dashboard
+
+![Dashboard de inventario y operaciones](docs/screenshots/dashboard.png)
+
+### Clientes
+
+![Gestion de clientes](docs/screenshots/clientes.png)
+
+### Productos
+
+![Gestion de productos](docs/screenshots/productos.png)
+
+### Cilindros
+
+![Gestion de cilindros](docs/screenshots/cilindros.png)
+
+### Pedidos
+
+![Gestion de pedidos](docs/screenshots/pedidos.png)
+
+### Movimientos
+
+![Historial y registro de movimientos](docs/screenshots/movimientos.png)
+
+### Recargas
+
+![Gestion de recargas con proveedor](docs/screenshots/recargas.png)
+
+### Maestros
+
+![Gestion de maestros del sistema](docs/screenshots/maestros.png)
 
 ## Tecnologías
 
