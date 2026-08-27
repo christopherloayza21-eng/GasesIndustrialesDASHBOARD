@@ -8,6 +8,8 @@
   --color-primary-dark: #063846;
   --color-accent: #f6bf4f;
   --color-success: #24b45a;
+  --color-info: #287a9a;
+  --color-warning: #b7791f;
   --color-danger: #d94b42;
   --color-border: #dce5ea;
   --color-text: #1f2a37;
@@ -76,7 +78,7 @@ body {
 
 .app-shell {
   display: grid;
-  grid-template-columns: 92px 1fr;
+  grid-template-columns: 248px 1fr;
   min-height: 100vh;
   padding: 28px;
 }
@@ -87,7 +89,7 @@ body {
   display: flex;
   align-self: start;
   flex-direction: column;
-  width: 92px;
+  width: 248px;
   height: calc(100vh - 56px);
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.22);
@@ -97,8 +99,9 @@ body {
 }
 
 .brand-mark {
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
   height: 78px;
   background: var(--color-sidebar-soft);
   color: #ffffff;
@@ -111,44 +114,58 @@ body {
   display: flex;
   flex: 1;
   flex-direction: column;
-  align-items: center;
-  gap: 14px;
-  padding: 24px 12px;
+  gap: 8px;
+  padding: 22px 14px;
 }
 
 .tab-button {
   position: relative;
   display: grid;
-  place-items: center;
-  width: 56px;
-  height: 56px;
-  min-height: 56px;
-  padding: 0;
+  grid-template-columns: 40px 1fr;
+  column-gap: 10px;
+  align-items: center;
+  width: 100%;
+  min-height: 62px;
+  padding: 8px 12px;
   border: 1px solid transparent;
   border-radius: 8px;
   background: transparent;
   color: rgba(255, 255, 255, 0.78);
   cursor: pointer;
+  text-align: left;
 }
 
 .tab-button span {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
   font-size: 12px;
   font-weight: 900;
   letter-spacing: 0;
 }
 
 .tab-button strong {
-  position: absolute;
-  left: 66px;
-  z-index: 5;
-  display: none;
-  padding: 8px 10px;
-  border-radius: 6px;
-  background: #1f2a37;
+  position: static;
+  display: block;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
   color: #ffffff;
-  font-size: 12px;
-  white-space: nowrap;
-  box-shadow: 0 12px 30px rgba(31, 42, 55, 0.22);
+  font-size: 14px;
+  line-height: 1.1;
+  box-shadow: none;
+}
+
+.tab-button small {
+  grid-column: 2;
+  display: block;
+  margin-top: -12px;
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 11px;
+  font-weight: 700;
 }
 
 .tab-button:hover,
@@ -158,13 +175,9 @@ body {
   color: #ffffff;
 }
 
-.tab-button:hover strong {
-  display: block;
-}
-
 .tab-button.active::before {
   position: absolute;
-  left: -12px;
+  left: -14px;
   width: 4px;
   height: 32px;
   border-radius: 999px;
@@ -217,6 +230,7 @@ h3 {
   margin: 0;
   line-height: 1.1;
   letter-spacing: 0;
+  font-family: "Arial Black", Inter, "Segoe UI", system-ui, sans-serif;
 }
 
 h1 {
@@ -294,6 +308,25 @@ textarea {
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
   margin-bottom: 22px;
+}
+
+.dashboard-tools {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 22px;
+  margin-bottom: 22px;
+  padding: 20px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: var(--shadow-soft);
+}
+
+.report-grid {
+  display: grid;
+  grid-template-columns: minmax(320px, 0.85fr) minmax(420px, 1.15fr);
+  gap: 22px;
 }
 
 .summary-card,
@@ -487,6 +520,43 @@ textarea {
   color: var(--color-danger);
 }
 
+.status-pill.info {
+  background: rgba(40, 122, 154, 0.12);
+  color: var(--color-info);
+}
+
+.status-pill.warning {
+  background: rgba(183, 121, 31, 0.16);
+  color: var(--color-warning);
+}
+
+.status-pill.muted {
+  background: rgba(107, 120, 134, 0.14);
+  color: var(--color-muted);
+}
+
+.status-list {
+  display: grid;
+  gap: 12px;
+  padding: 18px 22px 22px;
+}
+
+.status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface-soft);
+}
+
+.status-row strong {
+  color: var(--color-primary-dark);
+  font-size: 24px;
+}
+
 .table-action {
   min-height: 34px;
   margin: 2px;
@@ -497,6 +567,10 @@ textarea {
 .table-wrapper {
   overflow-x: auto;
   background: #ffffff;
+}
+
+.compact-table table {
+  min-width: 620px;
 }
 
 table {
@@ -563,8 +637,25 @@ tbody tr:hover {
     padding: 8px 14px;
   }
 
-  .tab-button strong {
+  .tab-button {
+    grid-template-columns: 1fr;
+    width: auto;
+    min-width: 112px;
+    min-height: 56px;
+    text-align: center;
+  }
+
+  .tab-button span {
     display: none;
+  }
+
+  .tab-button small {
+    grid-column: auto;
+    margin-top: 2px;
+  }
+
+  .tab-button strong {
+    display: block;
   }
 
   .tab-button.active::before {
@@ -590,6 +681,16 @@ tbody tr:hover {
 
   .summary-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .dashboard-tools,
+  .report-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-tools {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .form-grid,

@@ -6,6 +6,11 @@ const loginForm = document.querySelector("#loginForm");
 const loginStatus = document.querySelector("#loginStatus");
 const userSession = document.querySelector("#userSession");
 const movimientosBody = document.querySelector("#movimientosBody");
+const dashboardTipoMovimiento = document.querySelector("#dashboardTipoMovimiento");
+const dashboardEstadoCilindro = document.querySelector("#dashboardEstadoCilindro");
+const estadosCilindrosList = document.querySelector("#estadosCilindrosList");
+const clientesCilindrosBody = document.querySelector("#clientesCilindrosBody");
+const recargasPendientesBody = document.querySelector("#recargasPendientesBody");
 const tabButtons = document.querySelectorAll("[data-view]");
 const views = document.querySelectorAll(".view");
 
@@ -140,6 +145,8 @@ const crudModules = {
 refreshButton.addEventListener("click", cargarTodo);
 logoutButton.addEventListener("click", cerrarSesion);
 loginForm.addEventListener("submit", iniciarSesion);
+dashboardTipoMovimiento.addEventListener("change", cargarDashboard);
+dashboardEstadoCilindro.addEventListener("change", cargarDashboard);
 
 tabButtons.forEach((button) => {
   button.addEventListener("click", () => cambiarVista(button.dataset.view));
@@ -287,12 +294,25 @@ async function cargarDashboard() {
   statusText.textContent = "Cargando datos...";
 
   try {
-    const data = await apiJson("/api/dashboard/resumen");
+    const params = new URLSearchParams();
+
+    if (dashboardTipoMovimiento.value) {
+      params.set("tipoMovimiento", dashboardTipoMovimiento.value);
+    }
+
+    if (dashboardEstadoCilindro.value) {
+      params.set("estadoCilindro", dashboardEstadoCilindro.value);
+    }
+
+    const data = await apiJson(`/api/dashboard/resumen${params.size ? `?${params}` : ""}`);
 
     summaryElements.cilindrosDisponibles.textContent = data.cilindrosDisponibles;
     summaryElements.cilindrosEnClientes.textContent = data.cilindrosEnClientes;
     summaryElements.cilindrosEnProveedor.textContent = data.cilindrosEnProveedor;
     summaryElements.pedidosPendientes.textContent = data.pedidosPendientes;
+    renderizarEstadosCilindros(data.estadosCilindros);
+    renderizarClientesConCilindros(data.clientesConCilindros);
+    renderizarRecargasPendientes(data.recargasPendientes);
     renderizarMovimientosDashboard(data.movimientosRecientes);
     statusText.textContent = "Datos actualizados";
   } catch (error) {
@@ -1076,12 +1096,49 @@ function renderizarMovimientosDashboard(movimientos) {
         <td>${formatearFecha(movimiento.fechaMovimiento)}</td>
         <td>${movimiento.codigoCilindro}</td>
         <td>${movimiento.producto}</td>
-        <td>${movimiento.tipoMovimiento}</td>
+        <td>${badgeEstado(movimiento.tipoMovimiento)}</td>
         <td>${movimiento.cliente ?? "Sin cliente"}</td>
         <td>${movimiento.observacion ?? ""}</td>
       </tr>
     `).join("")
     : `<tr><td colspan="6">No hay movimientos registrados.</td></tr>`;
+}
+
+function renderizarEstadosCilindros(estados) {
+  estadosCilindrosList.innerHTML = estados.length
+    ? estados.map((item) => `
+      <div class="status-row">
+        <span>${badgeEstado(item.estado)}</span>
+        <strong>${item.total}</strong>
+      </div>
+    `).join("")
+    : `<p class="empty-text">No hay cilindros activos.</p>`;
+}
+
+function renderizarClientesConCilindros(clientes) {
+  clientesCilindrosBody.innerHTML = clientes.length
+    ? clientes.map((item) => `
+      <tr>
+        <td>${item.cliente}</td>
+        <td><strong>${item.totalCilindros}</strong></td>
+        <td>${item.ultimoMovimiento ?? "-"}</td>
+      </tr>
+    `).join("")
+    : `<tr><td colspan="3">No hay cilindros asignados a clientes.</td></tr>`;
+}
+
+function renderizarRecargasPendientes(recargas) {
+  recargasPendientesBody.innerHTML = recargas.length
+    ? recargas.map((item) => `
+      <tr>
+        <td>#${item.idEnvio}</td>
+        <td>${item.proveedor}</td>
+        <td>${item.numeroGuia ?? "-"}</td>
+        <td>${badgeEstado(`${item.pendientes} pendientes`)}</td>
+        <td>${formatearFecha(item.fechaEnvio)}</td>
+      </tr>
+    `).join("")
+    : `<tr><td colspan="5">No hay recargas pendientes.</td></tr>`;
 }
 
 async function apiJson(url, options = {}) {
@@ -1160,6 +1217,10 @@ function formatearValor(value) {
     return `<span class="status-pill ${value ? "" : "inactive"}">${value ? "Activo" : "Inactivo"}</span>`;
   }
 
+  if (typeof value === "string" && esEstadoVisual(value)) {
+    return badgeEstado(value);
+  }
+
   if (String(value).includes("T")) {
     const date = new Date(value);
 
@@ -1169,6 +1230,60 @@ function formatearValor(value) {
   }
 
   return value;
+}
+
+function badgeEstado(value) {
+  const estado = String(value ?? "").toUpperCase();
+  const label = formatearEtiquetaEstado(value);
+  const tone = obtenerTonoEstado(estado);
+
+  return `<span class="status-pill ${tone}">${label}</span>`;
+}
+
+function esEstadoVisual(value) {
+  return [
+    "LLENO_ALMACEN",
+    "VACIO_ALMACEN",
+    "EN_CLIENTE",
+    "EN_PROVEEDOR",
+    "EN_RECARGA",
+    "PENDIENTE",
+    "ASIGNADO",
+    "EN_REPARTO",
+    "ENTREGADO",
+    "CANCELADO",
+    "SALIDA_CLIENTE",
+    "RETORNO_CLIENTE",
+    "ENVIO_RECARGA",
+    "RETORNO_RECARGA"
+  ].includes(value);
+}
+
+function obtenerTonoEstado(estado) {
+  if (estado.includes("CLIENTE") || estado === "EN_REPARTO") {
+    return "warning";
+  }
+
+  if (estado.includes("PROVEEDOR") || estado.includes("RECARGA")) {
+    return "info";
+  }
+
+  if (estado.includes("VACIO") || estado === "PENDIENTE") {
+    return "muted";
+  }
+
+  if (estado === "CANCELADO") {
+    return "inactive";
+  }
+
+  return "";
+}
+
+function formatearEtiquetaEstado(value) {
+  return String(value ?? "")
+    .replaceAll("_", " ")
+    .toLowerCase()
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
 function formatearFecha(fecha) {

@@ -11,5 +11,11 @@ namespace GasesIndustriales.Api.Dtos.Dashboard
         public int PedidosPendientes { get; set; }
 
         public List<MovimientoRecienteDto> MovimientosRecientes { get; set; } = [];
+
+        public List<EstadoCilindroDto> EstadosCilindros { get; set; } = [];
+
+        public List<ClienteConCilindrosDto> ClientesConCilindros { get; set; } = [];
+
+        public List<RecargaPendienteDto> RecargasPendientes { get; set; } = [];
     }
 }
