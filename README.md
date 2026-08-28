@@ -77,6 +77,7 @@ GasesIndustrialesDASHBOARD/
 ├── database/
 │   ├── schema.sql
 │   ├── seed.sql
+│   ├── demo_seed.sql
 │   ├── queries.sql
 │   ├── fix_sequences.sql
 │   └── migrations/
@@ -119,7 +120,8 @@ Motor utilizado: PostgreSQL.
 Archivos principales:
 
 - `database/schema.sql`: crea la estructura completa de tablas.
-- `database/seed.sql`: inserta datos demo.
+- `database/seed.sql`: inserta datos minimos para desarrollo local.
+- `database/demo_seed.sql`: prepara una base demo mas completa para portafolio.
 - `database/queries.sql`: consultas útiles de prueba.
 - `database/fix_sequences.sql`: repara secuencias `SERIAL` si se insertaron datos manuales.
 - `database/migrations/`: cambios incrementales sobre una base ya creada.
@@ -140,6 +142,19 @@ database/seed.sql
 database/migrations/001_add_tipo_producto.sql
 database/migrations/002_add_usuarios.sql
 ```
+
+### Preparar Base Demo
+
+Para una demo publica o de portafolio, se puede usar:
+
+```text
+database/schema.sql
+database/demo_seed.sql
+```
+
+`demo_seed.sql` carga clientes, productos, cilindros, pedidos, movimientos, recargas, proveedores, conductores, vehiculos y usuarios demo.
+
+Importante: `demo_seed.sql` usa `TRUNCATE`, por lo que limpia las tablas principales antes de cargar los datos. Debe ejecutarse solo en una base demo, nunca sobre datos reales.
 
 Si ya tienes la base creada y solo necesitas agregar usuarios, ejecuta:
 
